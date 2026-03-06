@@ -3,10 +3,10 @@ import { QdrantVectorStore } from "@langchain/qdrant";
 import ollama from "ollama";
 
 async function query() {
-  const userQuery = "";
+  const userQuery = "What is the first law?";
 
   const embeddings = new OllamaEmbeddings({
-    model: "llama2",
+    model: "mxbai-embed-large:latest",
     baseUrl: "http://localhost:11434",
   });
 
@@ -29,14 +29,22 @@ async function query() {
                         Answer based on the context above.`;
 
   const response = await ollama.chat({
-    model: "llama2",
+    model: "llama2:latest",
     messages: [
       { role: "system", content: systemPrompt },
       { role: "user", content: userQuery },
     ],
   });
 
-  console.log(response.message.content);
+  return response.message.content;
 }
 
-query().then(() => process.exit());
+query()
+  .then((res) => {
+    console.log(res);
+    process.exit(0);
+  })
+  .catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });
