@@ -3,7 +3,7 @@ import { QdrantVectorStore } from "@langchain/qdrant";
 import ollama from "ollama";
 
 async function query() {
-  const userQuery = "What is the first law?";
+  const userQuery = "Who are the famous narcissists from history?";
 
   const embeddings = new OllamaEmbeddings({
     model: "mxbai-embed-large:latest",
@@ -18,15 +18,17 @@ async function query() {
     },
   );
 
-  const results = await vectorStore.similaritySearch(userQuery, 3);
+  const retriever = vectorStore.asRetriever({ k: 3 });
+
+  const results = await retriever.invoke(userQuery);
 
   const systemPrompt = `You are a helpful assistant. Use the following retrieved context to answer the user's question accurately. If the context does not contain enough information, say so.
 
                         <context>
-                        ${results.map((doc, i) => `[${i + 1}] ${doc.pageContent}`).join("\n\n")}
+                        ${JSON.stringify(results)}
                         </context>
 
-                        Answer based on the context above.`;
+                        Answer based on the context above. Mention the page and line number too`;
 
   const response = await ollama.chat({
     model: "llama2:latest",
